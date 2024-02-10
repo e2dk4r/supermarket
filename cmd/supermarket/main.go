@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.LUTC)
+
 	/* setup service dependencies */
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
