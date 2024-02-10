@@ -3,9 +3,9 @@ package supermarket
 import "errors"
 
 type Product struct {
-	Id    string
-	Name  string
-	Price float32
+	Id    string  `json:"id,omitempty"`
+	Name  string  `json:"name,omitempty"`
+	Price float32 `json:"price,omitempty"`
 }
 
 func (p *Product) Validate() error {
