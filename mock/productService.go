@@ -9,6 +9,9 @@ type ProductService struct {
 	ProductsFn      func(page int, perPage int) ([]*supermarket.Product, error)
 	productsInvoked bool
 
+	TotalProductsFn      func() (int, error)
+	totalProductsInvoked bool
+
 	CreateProductFn      func(p *supermarket.Product) error
 	createProductInvoked bool
 
@@ -32,6 +35,15 @@ func (ps *ProductService) Products(page int, perPage int) ([]*supermarket.Produc
 
 func (ps *ProductService) ProductsInvoked() bool {
 	return ps.productsInvoked
+}
+
+func (ps *ProductService) TotalProducts() (int, error) {
+	ps.totalProductsInvoked = true
+	return ps.TotalProductsFn()
+}
+
+func (ps *ProductService) TotalProductsInvoked() bool {
+	return ps.totalProductsInvoked
 }
 
 func (ps *ProductService) CreateProduct(p *supermarket.Product) error {

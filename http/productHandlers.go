@@ -26,6 +26,13 @@ func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	total, err := h.ProductService.TotalProducts()
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
+		return
+	}
+
 	products, err := h.ProductService.Products(page, perPage)
 	if err != nil {
 		log.Print(err)
@@ -38,7 +45,7 @@ func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonPaginatedResponse(w, page, perPage, 0, products)
+	jsonPaginatedResponse(w, page, perPage, total, products)
 }
 
 func (h *Handler) ProductShow(w http.ResponseWriter, r *http.Request) {

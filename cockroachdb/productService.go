@@ -68,6 +68,24 @@ func (ps *ProductService) Products(page int, perPage int) ([]*supermarket.Produc
 	return list, nil
 }
 
+func (ps *ProductService) TotalProducts() (int, error) {
+	var total int
+
+	row := ps.Conn.QueryRow(context.Background(), `
+	SELECT
+		COUNT(id)
+	FROM
+		products
+	`)
+
+	err := row.Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
+}
+
 func (ps *ProductService) CreateProduct(p *supermarket.Product) error {
 	err := crdbpgx.ExecuteTx(context.Background(), ps.Conn, pgx.TxOptions{}, func(tx pgx.Tx) error {
 		err := tx.QueryRow(context.Background(), "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING id;", p.Name, p.Price).Scan(&p.Id)

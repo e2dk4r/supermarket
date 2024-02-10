@@ -29,6 +29,7 @@ func (p *Product) Validate() error {
 type ProductService interface {
 	Product(id string) (*Product, error)
 	Products(page int, perPage int) ([]*Product, error)
+	TotalProducts() (int, error)
 	CreateProduct(p *Product) error
 	DeleteProduct(id string) (bool, error)
 }
