@@ -24,9 +24,9 @@ INSERT INTO products (id, name, price) VALUES
 ;
 
 -- orders table
-INSERT INTO orders (id) VALUES
-    ('0268feac-8135-4d5f-9e8d-01bc61263eba'),
-    ('2e77d060-8a5e-440b-a5c8-0d82aa8983d2')
+INSERT INTO orders (id, status) VALUES
+    ('0268feac-8135-4d5f-9e8d-01bc61263eba', 7),
+    ('2e77d060-8a5e-440b-a5c8-0d82aa8983d2', 1)
 ;
 
 INSERT INTO order_product (order_id, product_id, amount) VALUES

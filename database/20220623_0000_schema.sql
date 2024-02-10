@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE TABLE IF NOT EXISTS orders (
-    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY
+    id     UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    status INT  NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS order_product (

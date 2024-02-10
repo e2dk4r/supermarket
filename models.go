@@ -31,14 +31,24 @@ type ProductService interface {
 	Products(page int, perPage int) ([]*Product, error)
 	CreateProduct(p *Product) error
 	DeleteProduct(id string) (bool, error)
-	IsDuplicateError(err error) bool
-	IsNotFoundError(err error) bool
 }
 
 type Order struct {
-	Id     string
-	Basket []OrderItem
+	Id     string       `json:"id,omitempty"`
+	Basket []*OrderItem `json:"basket,omitempty"`
+	Status OrderStatus  `json:"status,omitempty"`
+	Total  float32      `json:"total,omitempty"`
 }
+
+type OrderStatus int
+
+const (
+	Unknown OrderStatus = 1<<iota - 1
+	InQueue
+	Shipped
+	Completed
+	Return
+)
 
 type OrderItem struct {
 	Amount  int
@@ -47,7 +57,7 @@ type OrderItem struct {
 
 type OrderService interface {
 	Order(id string) (*Order, error)
-	Orders() ([]*Order, error)
+	Orders(page int, perPage int) ([]*Order, error)
 	CreateOrder(o *Order) error
 	DeleteOrder(o *Order) error
 	OrderBasket(o *Order) error
