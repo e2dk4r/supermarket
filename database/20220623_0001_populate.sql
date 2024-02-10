@@ -1,5 +1,16 @@
 USE supermarket;
 
+-- users table
+INSERT INTO users (id, username, password) VALUES
+    ('422bd2b4-9cfd-457e-a58f-13421e100b85', 'e2dk4r', '$argon2id$v=19$m=65536,t=2,p=2$SieaXUZJgrMBsxDMkiESl58+FxgoqSQwK/7OfGTBAZc$B1651x5dfnh9KvKis2zs+XOaDRbN4PNuiDMoDdZHQCGFBUAiFqnoCm3jEYCbHGcs/q029PwI3FsELGNjuJfG3w'),
+    ('1daec192-9586-48a1-afff-097d35c6de13', 'trump',  '$argon2id$v=19$m=65536,t=2,p=2$SieaXUZJgrMBsxDMkiESl58+FxgoqSQwK/7OfGTBAZc$B1651x5dfnh9KvKis2zs+XOaDRbN4PNuiDMoDdZHQCGFBUAiFqnoCm3jEYCbHGcs/q029PwI3FsELGNjuJfG3w'),
+    ('2d02c171-7d64-47b2-8e4d-bd83481eb2c1', 'zayn',   '$argon2id$v=19$m=65536,t=2,p=2$SieaXUZJgrMBsxDMkiESl58+FxgoqSQwK/7OfGTBAZc$B1651x5dfnh9KvKis2zs+XOaDRbN4PNuiDMoDdZHQCGFBUAiFqnoCm3jEYCbHGcs/q029PwI3FsELGNjuJfG3w'),
+    ('8f671c26-a25e-4acc-be5e-881e47546dcb', 'james',  '$argon2id$v=19$m=65536,t=2,p=2$SieaXUZJgrMBsxDMkiESl58+FxgoqSQwK/7OfGTBAZc$B1651x5dfnh9KvKis2zs+XOaDRbN4PNuiDMoDdZHQCGFBUAiFqnoCm3jEYCbHGcs/q029PwI3FsELGNjuJfG3w')
+;
+--- decryption of '$argon2id$v=19$m=65536,t=2,p=2$SieaXUZJgrMBsxDMkiESl58+FxgoqSQwK/7OfGTBAZc$B1651x5dfnh9KvKis2zs+XOaDRbN4PNuiDMoDdZHQCGFBUAiFqnoCm3jEYCbHGcs/q029PwI3FsELGNjuJfG3w'
+--- is 'password'
+--- algorithm: argon2id memory: 64mb iterations: 2 parallelism: 2 salt length: 32 key length: 64
+
 -- products table
 INSERT INTO products (id, name, price) VALUES
     ('2f0495b9-099e-4c3f-9803-a4b8e32448a5', 'Onion', 3.50),

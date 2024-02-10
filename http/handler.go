@@ -9,22 +9,36 @@ import (
 )
 
 type Handler struct {
-	ProductService supermarket.ProductService
-	OrderService   supermarket.OrderService
+	ProductService  supermarket.ProductService
+	OrderService    supermarket.OrderService
+	UserService     supermarket.UserService
+	AuthService     supermarket.AuthService
+	PasswordService supermarket.PasswordService
+	RandomService   supermarket.RandomService
 }
 
+// middlewareFunc gets http writer and http request for inspecting
+// and modifying. returns true if next middleware should be processed,
+// false if it should be stopped
+type middlewareFunc func(http.ResponseWriter, *http.Request) bool
+
 type route struct {
-	Method  string
-	Path    string
-	Handler http.HandlerFunc
+	Method      string
+	Path        string
+	Handler     http.HandlerFunc
+	Middlewares []middlewareFunc
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	routes := []route{
+		// users
+		{Method: http.MethodPost, Path: "/signup", Handler: h.Signup},
+		{Method: http.MethodPost, Path: "/login", Handler: h.Login},
+
 		// products
 		{Method: http.MethodGet, Path: "/product/{productId}", Handler: h.ProductShow},
 		{Method: http.MethodGet, Path: "/products", Handler: h.ProductIndex},
-		{Method: http.MethodPost, Path: "/product/create", Handler: h.ProductCreate},
+		{Method: http.MethodPost, Path: "/product/create", Handler: h.ProductCreate, Middlewares: []middlewareFunc{h.MRequireAuth}},
 		{Method: http.MethodPost, Path: "/product/delete", Handler: h.ProductDelete},
 
 		// orders
@@ -37,6 +51,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		match := r.Method == route.Method && routeMatch(r.URL.Path, route.Path)
 		if !match {
 			continue
+		}
+
+		for _, middleware := range route.Middlewares {
+			next := middleware(w, r)
+			if !next {
+				return
+			}
 		}
 
 		route.Handler(w, r)

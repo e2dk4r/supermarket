@@ -52,3 +52,42 @@ type OrderService interface {
 	DeleteOrder(o *Order) error
 	OrderBasket(o *Order) error
 }
+
+type User struct {
+	Id       string `json:"-"`
+	Username string `json:"username"`
+	Password string `json:"-"`
+}
+
+type UserService interface {
+	User(username string) (*User, error)
+
+	// CreateUser creates user using username and password
+	// field of model. And writes generated id to id field
+	CreateUser(user *User) error
+}
+
+type AuthService interface {
+	// CreateToken generates an authentication token.
+	// It returns authentication token if user exists and
+	// password is a match.
+	CreateToken(u *User) (string, error)
+
+	// VerifyToken verifies an authentication token specified.
+	// It returns true if token is correct, false otherwise
+	VerifyToken(key string) error
+}
+
+type PasswordService interface {
+	// Hash generates hashed password from plain-text password
+	Hash(password string) (string, error)
+
+	// Verify performs compares between a plain-text password and hash,
+	// using the parameters and salt contained in the hash. It returns true if
+	// they match, otherwise it returns false.
+	Verify(password string, hash string) (bool, error)
+}
+
+type RandomService interface {
+	GenerateString(n int) (string, error)
+}

@@ -2,6 +2,26 @@ CREATE DATABASE IF NOT EXISTS supermarket;
 
 USE supermarket;
 
+CREATE TABLE IF NOT EXISTS users (
+    id         UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    username   STRING(256) NOT NULL UNIQUE,
+    password   STRING(256) NOT NULL,
+    created_at TIMESTAMPTZ(6) NULL,
+    updated_at TIMESTAMPTZ(6) NULL,
+
+    CONSTRAINT username_check CHECK (
+        -- username must be at least 2 characters
+        length(btrim(password)) >= 2
+        -- username must be at maximum 256 characters, unnecessary
+    ),
+
+    CONSTRAINT password_check CHECK (
+        -- password must be at least 8 characters
+        length(btrim(password)) >= 8
+        -- password must be at maximum 256 characters, unnecessary
+    )
+);
+
 CREATE TABLE IF NOT EXISTS products (
     id    UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     name  STRING NOT NULL UNIQUE,

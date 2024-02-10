@@ -11,7 +11,8 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/supermarket/main.go",
             "env": {
-               "DATABASE_URL": "postgresql://root@127.0.0.1:9000/supermarket?sslmode=disable"
+               "DATABASE_URL": "postgresql://root@127.0.0.1:9000/supermarket?sslmode=disable",
+               "JWT_KEY": "U2cBIHbAbhUYOLKeMvQBmWTPyWf1MZxYnzn4hm1xUS0iaRwV41C8jYbiNzGRfj43"
             }
         }
     ]
