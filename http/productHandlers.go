@@ -38,7 +38,7 @@ func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonSuccessResponse(w, products)
+	jsonPaginatedResponse(w, page, perPage, 0, products)
 }
 
 func (h *Handler) ProductShow(w http.ResponseWriter, r *http.Request) {

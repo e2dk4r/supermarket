@@ -2,48 +2,56 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/e2dk4r/supermarket"
 )
 
-type Response struct {
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
-}
-
-// jsonSuccessRepsonse writes message with http status 200
-func jsonSuccessResponseMessage(w http.ResponseWriter, message string) {
-	jsonResponse(w, http.StatusOK, nil, nil, message)
-}
-
-// jsonSuccessRepsonse writes data with http status 200
-func jsonSuccessResponse(w http.ResponseWriter, data interface{}) {
-	jsonResponse(w, http.StatusOK, data, nil, "")
-}
-
-// jsonSuccessRepsonse writes error with http status
-func jsonFailResponse(w http.ResponseWriter, status int, err error) {
-	jsonResponse(w, status, nil, err, "")
-}
-
-// jsonResponse writes data or error as json
-func jsonResponse(w http.ResponseWriter, status int, data interface{}, err error, message string) {
-	resp := Response{
+// jsonPaginatedResponse writes data as json with page, perPage and total properties
+func jsonPaginatedResponse(w http.ResponseWriter, page int, perPage int, total int, data interface{}) {
+	jsonResponse(w, http.StatusOK, struct {
+		Page    int         `json:"page"`
+		PerPage int         `json:"perPage"`
+		Total   int         `json:"total"`
+		Data    interface{} `json:"data,omitempty"`
+	}{
+		Page:    page,
+		PerPage: perPage,
+		Total:   total,
 		Data:    data,
-		Message: message,
-	}
-	if err != nil {
-		resp.Error = err.Error()
-	}
+	})
+}
 
+// jsonSuccessResponseMessage writes message with http status 200
+func jsonSuccessResponseMessage(w http.ResponseWriter, message string) {
+	jsonResponse(w, http.StatusOK, struct {
+		Message string `json:"message"`
+	}{
+		Message: message,
+	})
+}
+
+// jsonSuccessResponse writes data with http status 200
+func jsonSuccessResponse(w http.ResponseWriter, data interface{}) {
+	jsonResponse(w, http.StatusOK, data)
+}
+
+// jsonFailResponse writes error with http status
+func jsonFailResponse(w http.ResponseWriter, status int, err error) {
+	jsonResponse(w, status, struct {
+		Error string `json:"error"`
+	}{
+		Error: err.Error(),
+	})
+}
+
+// jsonResponse writes model as json to output
+func jsonResponse(w http.ResponseWriter, status int, model interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(status)
 
-	if err = json.NewEncoder(w).Encode(resp); err != nil {
+	if err := json.NewEncoder(w).Encode(model); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("[ERR] encoding resp %v:%s", resp, err)
-		fmt.Fprintf(w, "internal server error")
+		w.Write([]byte(supermarket.ErrInternalServerError.Error()))
 	}
 }

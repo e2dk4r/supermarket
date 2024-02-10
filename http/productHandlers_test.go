@@ -42,20 +42,18 @@ func TestProductShowWhenProductExists(t *testing.T) {
 		t.Errorf("must respond with http 200")
 	}
 
-	var model struct {
-		Data supermarket.Product `json:"data"`
-	}
+	var model supermarket.Product
 	_ = json.NewDecoder(resp.Body).Decode(&model)
 
-	if model.Data.Id != "2f0495b9-099e-4c3f-9803-a4b8e32448a5" {
+	if model.Id != "2f0495b9-099e-4c3f-9803-a4b8e32448a5" {
 		t.Errorf("id is not same")
 	}
 
-	if model.Data.Name != "Onion" {
+	if model.Name != "Onion" {
 		t.Errorf("name is not same")
 	}
 
-	if model.Data.Price != 3.5 {
+	if model.Price != 3.5 {
 		t.Errorf("price is not same")
 	}
 }
