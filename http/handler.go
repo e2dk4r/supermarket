@@ -3,7 +3,6 @@ package http
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/e2dk4r/supermarket"
 )
@@ -42,20 +41,20 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		{Method: http.MethodGet, Path: "/token", Handler: h.Token},
 
 		// products
-		{Method: http.MethodGet, Path: "/product/{productId}", Handler: h.ProductShow},
+		{Method: http.MethodGet, Path: "/product/.", Handler: h.ProductShow},
 		{Method: http.MethodGet, Path: "/products", Handler: h.ProductIndex},
 		{Method: http.MethodPost, Path: "/product/create", Handler: h.ProductCreate, Middlewares: []middlewareFunc{h.MRequireAuth}},
 		{Method: http.MethodPost, Path: "/product/delete", Handler: h.ProductDelete},
 
 		// orders
-		{Method: http.MethodGet, Path: "/order/{orderId}", Handler: h.OrderShow},
+		{Method: http.MethodGet, Path: "/order/.", Handler: h.OrderShow},
 		{Method: http.MethodGet, Path: "/orders", Handler: h.OrderIndex},
 		{Method: http.MethodPost, Path: "/order/create", Handler: h.OrderCreate},
 		{Method: http.MethodPost, Path: "/order/delete", Handler: h.OrderCreate},
 	}
 
 	for _, route := range routes {
-		match := r.Method == route.Method && routeMatch(r.URL.Path, route.Path)
+		match := r.Method == route.Method && RouteMatch(r.URL.Path, route.Path)
 		if !match {
 			continue
 		}
@@ -77,30 +76,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.NotFound(w, r)
-}
-
-func routeMatch(requestedUrl, routeUrl string) bool {
-	if !strings.Contains(routeUrl, "{") && requestedUrl == routeUrl {
-		return true
-	}
-
-	// is it dynamic route
-	index := strings.Index(routeUrl, "{")
-	if index < 0 {
-		return false
-	}
-
-	// check if matches dynamic route
-	if !strings.HasPrefix(requestedUrl, routeUrl[:index]) {
-		return false
-	}
-
-	// only one dynamic variable supported
-	if strings.Contains(requestedUrl[index:], "/") {
-		return false
-	}
-
-	return true
 }
 
 func (h *Handler) NotFound(w http.ResponseWriter, r *http.Request) {
