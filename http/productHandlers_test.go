@@ -64,6 +64,8 @@ func TestProductShowWhenProductDoesntExist(t *testing.T) {
 		ProductFn: func(id string) (*supermarket.Product, error) {
 			return nil, fmt.Errorf("no row exists")
 		},
+	}
+	dbs := &mock.DbErrorService{
 		IsNotFoundErrorFn: func(err error) bool {
 			return true
 		},
@@ -71,6 +73,7 @@ func TestProductShowWhenProductDoesntExist(t *testing.T) {
 
 	h := http.Handler{
 		ProductService: ps,
+		DbErrorService: dbs,
 	}
 
 	req := httptest.NewRequest("GET", "/product/2f0495b9-099e-4c3f-9803-a4b8e32448a5", nil)
@@ -84,7 +87,7 @@ func TestProductShowWhenProductDoesntExist(t *testing.T) {
 		t.Errorf("did not call Product() from product service")
 	}
 
-	if !ps.IsNotFoundErrorInvoked() {
+	if !dbs.IsNotFoundErrorInvoked() {
 		t.Errorf("did not call IsNotFoundError() from product service")
 	}
 
@@ -108,6 +111,8 @@ func TestProductShowWhenDatabaseError(t *testing.T) {
 		ProductFn: func(id string) (*supermarket.Product, error) {
 			return nil, fmt.Errorf("timeout")
 		},
+	}
+	dbs := &mock.DbErrorService{
 		IsNotFoundErrorFn: func(err error) bool {
 			return false
 		},
@@ -115,6 +120,7 @@ func TestProductShowWhenDatabaseError(t *testing.T) {
 
 	h := http.Handler{
 		ProductService: ps,
+		DbErrorService: dbs,
 	}
 
 	req := httptest.NewRequest("GET", "/product/2f0495b9-099e-4c3f-9803-a4b8e32448a5", nil)
@@ -128,7 +134,7 @@ func TestProductShowWhenDatabaseError(t *testing.T) {
 		t.Errorf("did not call Product() from product service")
 	}
 
-	if !ps.IsNotFoundErrorInvoked() {
+	if !dbs.IsNotFoundErrorInvoked() {
 		t.Errorf("did not call IsNotFoundError() from product service")
 	}
 
@@ -153,9 +159,15 @@ func TestProductShowWhenProductIdIsNotUUID(t *testing.T) {
 			return nil, fmt.Errorf("database error")
 		},
 	}
+	dbs := &mock.DbErrorService{
+		IsNotFoundErrorFn: func(err error) bool {
+			return true
+		},
+	}
 
 	h := http.Handler{
 		ProductService: ps,
+		DbErrorService: dbs,
 	}
 
 	req := httptest.NewRequest("GET", "/product/xx", nil)
@@ -169,7 +181,7 @@ func TestProductShowWhenProductIdIsNotUUID(t *testing.T) {
 		t.Errorf("must not call Product() from product service")
 	}
 
-	if ps.IsNotFoundErrorInvoked() {
+	if dbs.IsNotFoundErrorInvoked() {
 		t.Errorf("must not call IsNotFoundError() from product service")
 	}
 

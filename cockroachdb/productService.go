@@ -8,7 +8,6 @@ import (
 	"github.com/e2dk4r/supermarket"
 
 	"github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
-	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -103,18 +102,4 @@ func (ps *ProductService) DeleteProduct(productId string) (bool, error) {
 		log.Printf("product deleted: %v", productId)
 	}
 	return deleted, err
-}
-
-func (ps *ProductService) IsDuplicateError(err error) bool {
-	var pgError *pgconn.PgError
-
-	if !errors.As(err, &pgError) {
-		return false
-	}
-
-	return pgError.Code == "23505"
-}
-
-func (ps *ProductService) IsNotFoundError(err error) bool {
-	return err == pgx.ErrNoRows
 }

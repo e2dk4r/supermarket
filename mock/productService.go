@@ -14,12 +14,6 @@ type ProductService struct {
 
 	DeleteProductFn      func(id string) (bool, error)
 	deleteProductInvoked bool
-
-	IsDuplicateErrorFn      func(err error) bool
-	isDuplicateErrorInvoked bool
-
-	IsNotFoundErrorFn      func(err error) bool
-	isNotFoundErrorInvoked bool
 }
 
 func (ps *ProductService) Product(id string) (*supermarket.Product, error) {
@@ -56,22 +50,4 @@ func (ps *ProductService) DeleteProduct(id string) (bool, error) {
 
 func (ps *ProductService) DeleteProductInvoked() bool {
 	return ps.deleteProductInvoked
-}
-
-func (ps *ProductService) IsDuplicateError(err error) bool {
-	ps.isDuplicateErrorInvoked = true
-	return ps.IsDuplicateErrorFn(err)
-}
-
-func (ps *ProductService) IsDuplicateErrorInvoked() bool {
-	return ps.isDuplicateErrorInvoked
-}
-
-func (ps *ProductService) IsNotFoundError(err error) bool {
-	ps.isNotFoundErrorInvoked = true
-	return ps.IsNotFoundErrorFn(err)
-}
-
-func (ps *ProductService) IsNotFoundErrorInvoked() bool {
-	return ps.isNotFoundErrorInvoked
 }

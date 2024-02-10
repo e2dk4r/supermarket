@@ -11,16 +11,77 @@ import (
 )
 
 func (h *Handler) Signup(w http.ResponseWriter, r *http.Request) {
-	random, err := h.RandomService.GenerateString(32)
+	var request struct {
+		Username             string `json:"username"`
+		Password             string `json:"password"`
+		PasswordConfirmation string `json:"password_confirmation"`
+		Token                string `json:"token"`
+	}
+
+	// parse
+	defer r.Body.Close()
+	{
+		reader := io.LimitReader(r.Body, 1<<20)
+		err := json.NewDecoder(reader).Decode(&request)
+		if err != nil {
+			jsonFailResponse(w, http.StatusBadRequest, errors.New("cannot parse request"))
+			return
+		}
+	}
+
+	// validate
+	if request.Username == "" || len(request.Username) < 3 || len(request.Username) > 256 {
+		jsonFailResponse(w, http.StatusUnprocessableEntity, errors.New("username is required. min 3 max 256"))
+		return
+	}
+	if request.Password == "" || len(request.Password) < 8 || len(request.Password) > 256 {
+		jsonFailResponse(w, http.StatusUnprocessableEntity, errors.New("password is required. min 8 max 256"))
+		return
+	}
+	if request.PasswordConfirmation == "" || request.Password != request.PasswordConfirmation {
+		jsonFailResponse(w, http.StatusUnprocessableEntity, errors.New("password confirmation is required. must be same as password"))
+		return
+	}
+	if request.Token == "" {
+		jsonFailResponse(w, http.StatusUnprocessableEntity, errors.New("token is required"))
+		return
+	}
+	if err := h.AuthService.VerifyAnonToken(request.Token); err != nil {
+		jsonFailResponse(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	// action
+	user := &supermarket.User{
+		Username: request.Username,
+		Password: request.Password,
+	}
+
+	err := h.UserService.CreateUser(user)
 	if err != nil {
+		if h.DbErrorService.IsDuplicateError(err) {
+			jsonFailResponse(w, http.StatusBadRequest, errors.New("cannot create user"))
+		} else {
+			jsonFailResponse(w, http.StatusBadRequest, errors.New("cannot create user"))
+		}
+		return
+	}
+
+	jsonSuccessResponseMessage(w, "user created")
+}
+
+func (h *Handler) Token(w http.ResponseWriter, r *http.Request) {
+	token, err := h.AuthService.CreateAnonToken()
+	if err != nil {
+		log.Println(err)
 		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
 		return
 	}
 
 	jsonSuccessResponse(w, struct {
-		Message string
+		Token string `json:"token"`
 	}{
-		Message: random,
+		Token: token,
 	})
 }
 

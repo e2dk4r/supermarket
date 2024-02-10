@@ -54,7 +54,7 @@ func (h *Handler) ProductShow(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print(err)
 
-		if h.ProductService.IsNotFoundError(err) {
+		if h.DbErrorService.IsNotFoundError(err) {
 			jsonFailResponse(w, http.StatusNotFound, supermarket.ErrNotFound)
 			return
 		}
@@ -92,7 +92,7 @@ func (h *Handler) ProductCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print(err)
 
-		if h.ProductService.IsDuplicateError(err) {
+		if h.DbErrorService.IsDuplicateError(err) {
 			jsonFailResponse(w, http.StatusBadRequest, fmt.Errorf("duplicate product"))
 			return
 		}

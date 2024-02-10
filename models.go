@@ -76,6 +76,13 @@ type AuthService interface {
 	// VerifyToken verifies an authentication token specified.
 	// It returns true if token is correct, false otherwise
 	VerifyToken(key string) error
+
+	// CreateAnonToken generates an short lived authentication token.
+	CreateAnonToken() (string, error)
+
+	// VerifyAnonToken verifies an authentication token specified.
+	// It returns nil if token is correct
+	VerifyAnonToken(key string) error
 }
 
 type PasswordService interface {
@@ -90,4 +97,9 @@ type PasswordService interface {
 
 type RandomService interface {
 	GenerateString(n int) (string, error)
+}
+
+type DbErrorService interface {
+	IsDuplicateError(err error) bool
+	IsNotFoundError(err error) bool
 }

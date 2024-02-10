@@ -15,6 +15,7 @@ type Handler struct {
 	AuthService     supermarket.AuthService
 	PasswordService supermarket.PasswordService
 	RandomService   supermarket.RandomService
+	DbErrorService  supermarket.DbErrorService
 }
 
 // middlewareFunc gets http writer and http request for inspecting
@@ -38,6 +39,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// users
 		{Method: http.MethodPost, Path: "/signup", Handler: h.Signup},
 		{Method: http.MethodPost, Path: "/login", Handler: h.Login},
+		{Method: http.MethodGet, Path: "/token", Handler: h.Token},
 
 		// products
 		{Method: http.MethodGet, Path: "/product/{productId}", Handler: h.ProductShow},
@@ -46,9 +48,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		{Method: http.MethodPost, Path: "/product/delete", Handler: h.ProductDelete},
 
 		// orders
-		{Method: http.MethodGet, Path: "/order/{orderId}", Handler: h.OrderIndex},
-		{Method: http.MethodPost, Path: "/order/create", Handler: h.OrderCreate},
+		{Method: http.MethodGet, Path: "/order/{orderId}", Handler: h.OrderShow},
 		{Method: http.MethodGet, Path: "/orders", Handler: h.OrderIndex},
+		{Method: http.MethodPost, Path: "/order/create", Handler: h.OrderCreate},
+		{Method: http.MethodPost, Path: "/order/delete", Handler: h.OrderCreate},
 	}
 
 	for _, route := range routes {

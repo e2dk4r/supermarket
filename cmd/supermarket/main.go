@@ -71,12 +71,17 @@ func main() {
 		Verifier: jwtVerifier,
 	}
 
+	dbErrorService := &cockroachdb.DbErrorService{}
+
 	/* setup http */
 	handler := myHttp.Handler{
-		ProductService: productService,
-		OrderService:   orderService,
-		UserService:    userService,
-		AuthService:    authService,
+		ProductService:  productService,
+		OrderService:    orderService,
+		UserService:     userService,
+		AuthService:     authService,
+		PasswordService: passwordService,
+		RandomService:   randomService,
+		DbErrorService:  dbErrorService,
 	}
 
 	err = http.ListenAndServe(":8080", &handler)

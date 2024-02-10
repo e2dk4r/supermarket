@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"errors"
 	"time"
 
 	"github.com/cristalhq/jwt/v4"
@@ -45,7 +44,25 @@ func (as *AuthService) CreateToken(u *supermarket.User) (string, error) {
 	token, err := builder.Build(&jwt.RegisteredClaims{
 		ID:       id,
 		IssuedAt: jwt.NewNumericDate(time.Now()),
-		Issuer:   user.Id,
+		Subject:  user.Id,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return token.String(), nil
+}
+
+func (as *AuthService) CreateAnonToken() (string, error) {
+	id, err := as.RandomService.GenerateString(32)
+	if err != nil {
+		return "", err
+	}
+
+	token, err := jwt.NewBuilder(as.Signer).Build(&jwt.RegisteredClaims{
+		ID:       id,
+		IssuedAt: jwt.NewNumericDate(time.Now()),
 	})
 
 	if err != nil {
@@ -56,6 +73,14 @@ func (as *AuthService) CreateToken(u *supermarket.User) (string, error) {
 }
 
 func (as *AuthService) VerifyToken(key string) error {
+	return as.verifyToken(key, false)
+}
+
+func (as *AuthService) VerifyAnonToken(key string) error {
+	return as.verifyToken(key, true)
+}
+
+func (as *AuthService) verifyToken(key string, anon bool) error {
 	token, err := jwt.Parse([]byte(key), as.Verifier)
 
 	if err != nil {
@@ -69,10 +94,13 @@ func (as *AuthService) VerifyToken(key string) error {
 	}
 
 	if claims.IssuedAt == nil {
-		return errors.New("token must have iat claim")
+		return supermarket.ErrTokenIatClaim
 	}
 	if claims.IssuedAt.Add(as.TokenValidDuration).Before(time.Now()) {
-		return errors.New("expired token")
+		return supermarket.ErrTokenExpired
+	}
+	if !anon && claims.Subject == "" {
+		return supermarket.ErrTokenSubjectClaim
 	}
 
 	return nil
