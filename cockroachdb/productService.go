@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/e2dk4r/supermarket"
 
+	"github.com/cockroachdb/cockroach-go/v2/crdb/crdbpgx"
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -68,9 +71,33 @@ func (ps *ProductService) Products(page int, perPage int) ([]*supermarket.Produc
 }
 
 func (ps *ProductService) CreateProduct(p *supermarket.Product) error {
-	return fmt.Errorf("no")
+	err := crdbpgx.ExecuteTx(context.Background(), ps.Conn, pgx.TxOptions{}, func(tx pgx.Tx) error {
+		err := tx.QueryRow(context.Background(), "INSERT INTO products (name, price) VALUES ($1, $2) RETURNING id;", p.Name, p.Price).Scan(&p.Id)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("product created: %#v", p)
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ps *ProductService) DeleteProduct(p *supermarket.Product) error {
 	return fmt.Errorf("no")
+}
+
+func (ps *ProductService) IsDuplicateError(err error) bool {
+	var pgError *pgconn.PgError
+
+	if !errors.As(err, &pgError) {
+		return false
+	}
+
+	return pgError.Code == "23505"
 }

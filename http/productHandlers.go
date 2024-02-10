@@ -1,10 +1,14 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/e2dk4r/supermarket"
 )
 
 func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
@@ -49,6 +53,40 @@ func (h *Handler) ProductShow(w http.ResponseWriter, r *http.Request) {
 	jsonSuccessResponse(w, product)
 }
 
+const productRequestMaxBytes = 512 << 10 // 512kb
+
 func (h *Handler) ProductCreate(w http.ResponseWriter, r *http.Request) {
-	jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("not implemented"))
+	p := supermarket.Product{}
+	defer r.Body.Close()
+
+	// decode json
+	err := json.NewDecoder(io.LimitReader(r.Body, productRequestMaxBytes)).Decode(&p)
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("product not specified"))
+		return
+	}
+
+	// validate product
+	err = p.Validate()
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = h.ProductService.CreateProduct(&p)
+	if err != nil {
+		log.Print(err)
+
+		if h.ProductService.IsDuplicateError(err) {
+			jsonFailResponse(w, http.StatusBadRequest, fmt.Errorf("duplicate product"))
+			return
+		}
+
+		jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("cannot create product"))
+		return
+	}
+
+	jsonSuccessResponse(w, p)
 }
