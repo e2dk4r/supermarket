@@ -51,6 +51,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.AuthService.CreateToken(&supermarket.User{Username: user.Username, Password: user.Password})
 	if err != nil {
+		if err == supermarket.ErrPasswordNotMatch {
+			jsonFailResponse(w, http.StatusUnauthorized, errors.New("username or password is not correct"))
+			return
+		}
+
 		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
 		return
 	}

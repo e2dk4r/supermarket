@@ -31,7 +31,7 @@ func (as *AuthService) CreateToken(u *supermarket.User) (string, error) {
 		return "", err
 	}
 	if !match {
-		return "", errors.New("passwords does not match")
+		return "", supermarket.ErrPasswordNotMatch
 	}
 
 	// creating jw token
