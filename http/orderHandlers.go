@@ -24,6 +24,12 @@ func (h *Handler) OrderIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	total, err := h.OrderService.TotalOrders()
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
+		return
+	}
 	orders, err := h.OrderService.Orders(page, perPage)
 	if err != nil {
 		log.Print(err)
@@ -53,7 +59,7 @@ func (h *Handler) OrderIndex(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	jsonPaginatedResponse(w, page, perPage, 0, minifiedOrders)
+	jsonPaginatedResponse(w, page, perPage, total, minifiedOrders)
 }
 
 func (h *Handler) OrderShow(w http.ResponseWriter, r *http.Request) {

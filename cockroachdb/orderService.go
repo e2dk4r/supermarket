@@ -146,6 +146,22 @@ func (s *OrderService) Orders(page int, perPage int) ([]*supermarket.Order, erro
 	return orders, nil
 }
 
+func (s *OrderService) TotalOrders() (int, error) {
+	row := s.Conn.QueryRow(context.Background(), `
+	SELECT
+		COUNT(id)
+	FROM orders
+	`)
+
+	var total int
+	err := row.Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
+}
+
 func (s *OrderService) CreateOrder(o *supermarket.Order) error {
 	return fmt.Errorf("no")
 }

@@ -58,6 +58,7 @@ type OrderItem struct {
 type OrderService interface {
 	Order(id string) (*Order, error)
 	Orders(page int, perPage int) ([]*Order, error)
+	TotalOrders() (int, error)
 	CreateOrder(o *Order) error
 	DeleteOrder(o *Order) error
 	OrderBasket(o *Order) error
