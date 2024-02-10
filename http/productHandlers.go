@@ -33,15 +33,15 @@ func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if total == 0 {
+		jsonFailResponse(w, http.StatusNotFound, fmt.Errorf("there is no product available"))
+		return
+	}
+
 	products, err := h.ProductService.Products(page, perPage)
 	if err != nil {
 		log.Print(err)
 		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
-		return
-	}
-
-	if len(products) == 0 {
-		jsonFailResponse(w, http.StatusNotFound, fmt.Errorf("there is no product available"))
 		return
 	}
 
