@@ -19,15 +19,31 @@ func getQueryPageParam(r *http.Request) (int, error) {
 }
 
 func getQueryPerPageParam(r *http.Request) (int, error) {
-	page, err := getQueryIntParam(r, "perPage", 1)
+	perPage, err := getQueryIntParam(r, "perPage", 25)
 	if err != nil {
 		return 0, err
 	}
-	if page <= 0 {
+	if perPage <= 0 {
 		return 0, errors.New("per page must be bigger than 0")
 	}
+	if perPage > 500_000 {
+		return 0, errors.New("per page must be smaller than 500_000")
+	}
 
-	return page, nil
+	var valid = []int{5, 25, 50, 250, 500}
+	ok := false
+	for _, i := range valid {
+
+		if i == perPage {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return 0, errors.New("per page is invalid")
+	}
+
+	return perPage, nil
 }
 
 func getQueryIntParam(r *http.Request, param string, def int) (int, error) {

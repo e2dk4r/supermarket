@@ -10,20 +10,20 @@ import (
 func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 	page, err := getQueryPageParam(r)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("page not recognized"))
 		return
 	}
 	perPage, err := getQueryPerPageParam(r)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("per page not recognized"))
 		return
 	}
 
 	products, err := h.ProductService.Products(page, perPage)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("internal server error"))
 		return
 	}

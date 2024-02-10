@@ -2,6 +2,7 @@ package cockroachdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/e2dk4r/supermarket"
@@ -31,7 +32,39 @@ func (ps *ProductService) Product(id string) (*supermarket.Product, error) {
 }
 
 func (ps *ProductService) Products(page int, perPage int) ([]*supermarket.Product, error) {
-	return nil, fmt.Errorf("no")
+	if page <= 0 || page > 500000 {
+		return nil, errors.New("page limits exceeded")
+	}
+	if perPage <= 0 || perPage > 250 {
+		return nil, errors.New("page limits exceeded")
+	}
+
+	offset := (page - 1) * perPage
+	rows, err := ps.Conn.Query(context.Background(), "SELECT id, name, price FROM products OFFSET $1 LIMIT $2", offset, perPage)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []*supermarket.Product
+
+	for rows.Next() {
+		var id, name string
+		var price float32
+
+		err = rows.Scan(&id, &name, &price)
+		if err != nil {
+			return nil, err
+		}
+
+		list = append(list, &supermarket.Product{
+			Id:    id,
+			Name:  name,
+			Price: price,
+		})
+	}
+
+	return list, nil
 }
 
 func (ps *ProductService) CreateProduct(p *supermarket.Product) error {
