@@ -30,6 +30,10 @@ type route struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	globalMiddlewares := []middlewareFunc{
+		h.MSecurityHeaders,
+	}
+
 	routes := []route{
 		// users
 		{Method: http.MethodPost, Path: "/signup", Handler: h.Signup},
@@ -53,6 +57,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		for _, middleware := range globalMiddlewares {
+			if !middleware(w, r) {
+				return
+			}
+		}
 		for _, middleware := range route.Middlewares {
 			next := middleware(w, r)
 			if !next {
