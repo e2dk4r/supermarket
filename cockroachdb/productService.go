@@ -3,7 +3,6 @@ package cockroachdb
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/e2dk4r/supermarket"
@@ -88,8 +87,22 @@ func (ps *ProductService) CreateProduct(p *supermarket.Product) error {
 	return nil
 }
 
-func (ps *ProductService) DeleteProduct(p *supermarket.Product) error {
-	return fmt.Errorf("no")
+func (ps *ProductService) DeleteProduct(productId string) (bool, error) {
+	deleted := false
+	err := crdbpgx.ExecuteTx(context.Background(), ps.Conn, pgx.TxOptions{}, func(tx pgx.Tx) error {
+		tag, err := tx.Exec(context.Background(), "DELETE FROM products WHERE id = $1", productId)
+		if err != nil {
+			return err
+		}
+
+		deleted = tag.RowsAffected() == 1
+		return nil
+	})
+
+	if deleted {
+		log.Printf("product deleted: %v", productId)
+	}
+	return deleted, err
 }
 
 func (ps *ProductService) IsDuplicateError(err error) bool {

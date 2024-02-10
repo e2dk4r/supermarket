@@ -8,24 +8,31 @@ import (
 )
 
 type Response struct {
-	Data  interface{} `json:"data,omitempty"`
-	Error string      `json:"error,omitempty"`
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+	Error   string      `json:"error,omitempty"`
+}
+
+// jsonSuccessRepsonse writes message with http status 200
+func jsonSuccessResponseMessage(w http.ResponseWriter, message string) {
+	jsonResponse(w, http.StatusOK, nil, nil, message)
 }
 
 // jsonSuccessRepsonse writes data with http status 200
 func jsonSuccessResponse(w http.ResponseWriter, data interface{}) {
-	jsonResponse(w, http.StatusOK, data, nil)
+	jsonResponse(w, http.StatusOK, data, nil, "")
 }
 
 // jsonSuccessRepsonse writes error with http status
 func jsonFailResponse(w http.ResponseWriter, status int, err error) {
-	jsonResponse(w, status, nil, err)
+	jsonResponse(w, status, nil, err, "")
 }
 
 // jsonResponse writes data or error as json
-func jsonResponse(w http.ResponseWriter, status int, data interface{}, err error) {
+func jsonResponse(w http.ResponseWriter, status int, data interface{}, err error, message string) {
 	resp := Response{
-		Data: data,
+		Data:    data,
+		Message: message,
 	}
 	if err != nil {
 		resp.Error = err.Error()

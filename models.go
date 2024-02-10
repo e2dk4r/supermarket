@@ -30,7 +30,7 @@ type ProductService interface {
 	Product(id string) (*Product, error)
 	Products(page int, perPage int) ([]*Product, error)
 	CreateProduct(p *Product) error
-	DeleteProduct(p *Product) error
+	DeleteProduct(id string) (bool, error)
 	IsDuplicateError(err error) bool
 }
 

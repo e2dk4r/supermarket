@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/e2dk4r/supermarket"
+	"github.com/google/uuid"
 )
 
 func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
@@ -89,4 +90,43 @@ func (h *Handler) ProductCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonSuccessResponse(w, p)
+}
+
+func (h *Handler) ProductDelete(w http.ResponseWriter, r *http.Request) {
+	var product supermarket.Product
+	defer r.Body.Close()
+
+	limited := io.LimitReader(r.Body, productRequestMaxBytes)
+	err := json.NewDecoder(limited).Decode(&product)
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("cannot parse product id"))
+		return
+	}
+
+	if product.Id == "" {
+		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("id required"))
+		return
+	}
+
+	_, err = uuid.Parse(product.Id)
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("product id must be in uuid format"))
+		return
+	}
+
+	deleted, err := h.ProductService.DeleteProduct(product.Id)
+	if err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("cannot delete product"))
+		return
+	}
+	if !deleted {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusNotFound, fmt.Errorf("there is no product with that id"))
+		return
+	}
+
+	jsonSuccessResponseMessage(w, "product deleted")
 }

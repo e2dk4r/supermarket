@@ -7,6 +7,7 @@ require github.com/cockroachdb/cockroach-go/v2 v2.2.14
 require github.com/pkg/errors v0.9.1 // indirect
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.12.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

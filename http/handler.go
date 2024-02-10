@@ -25,6 +25,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		{Method: http.MethodGet, Path: "/product/{productId}", Handler: h.ProductShow},
 		{Method: http.MethodGet, Path: "/products", Handler: h.ProductIndex},
 		{Method: http.MethodPost, Path: "/product/create", Handler: h.ProductCreate},
+		{Method: http.MethodPost, Path: "/product/delete", Handler: h.ProductDelete},
 
 		// orders
 		{Method: http.MethodGet, Path: "/order/{orderId}", Handler: h.OrderIndex},
