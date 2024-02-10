@@ -66,6 +66,9 @@ func TestProductShowWhenProductDoesntExist(t *testing.T) {
 		ProductFn: func(id string) (*supermarket.Product, error) {
 			return nil, fmt.Errorf("no row exists")
 		},
+		IsNotFoundErrorFn: func(err error) bool {
+			return true
+		},
 	}
 
 	h := http.Handler{
@@ -81,6 +84,10 @@ func TestProductShowWhenProductDoesntExist(t *testing.T) {
 	// assert
 	if !ps.ProductInvoked() {
 		t.Errorf("did not call Product() from product service")
+	}
+
+	if !ps.IsNotFoundErrorInvoked() {
+		t.Errorf("did not call IsNotFoundError() from product service")
 	}
 
 	if resp.StatusCode != 404 {
@@ -103,6 +110,9 @@ func TestProductShowWhenDatabaseError(t *testing.T) {
 		ProductFn: func(id string) (*supermarket.Product, error) {
 			return nil, fmt.Errorf("timeout")
 		},
+		IsNotFoundErrorFn: func(err error) bool {
+			return false
+		},
 	}
 
 	h := http.Handler{
@@ -118,6 +128,10 @@ func TestProductShowWhenDatabaseError(t *testing.T) {
 	// assert
 	if !ps.ProductInvoked() {
 		t.Errorf("did not call Product() from product service")
+	}
+
+	if !ps.IsNotFoundErrorInvoked() {
+		t.Errorf("did not call IsNotFoundError() from product service")
 	}
 
 	if resp.StatusCode != 500 {
@@ -155,6 +169,10 @@ func TestProductShowWhenProductIdIsNotUUID(t *testing.T) {
 	// assert
 	if ps.ProductInvoked() {
 		t.Errorf("must not call Product() from product service")
+	}
+
+	if ps.IsNotFoundErrorInvoked() {
+		t.Errorf("must not call IsNotFoundError() from product service")
 	}
 
 	if resp.StatusCode != 422 {

@@ -114,3 +114,7 @@ func (ps *ProductService) IsDuplicateError(err error) bool {
 
 	return pgError.Code == "23505"
 }
+
+func (ps *ProductService) IsNotFoundError(err error) bool {
+	return err == pgx.ErrNoRows
+}

@@ -29,7 +29,7 @@ func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 	products, err := h.ProductService.Products(page, perPage)
 	if err != nil {
 		log.Print(err)
-		jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("internal server error"))
+		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
 		return
 	}
 
@@ -44,10 +44,22 @@ func (h *Handler) ProductIndex(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) ProductShow(w http.ResponseWriter, r *http.Request) {
 	productId := filepath.Base(r.URL.Path)
 
+	if _, err := uuid.Parse(productId); err != nil {
+		log.Print(err)
+		jsonFailResponse(w, http.StatusUnprocessableEntity, fmt.Errorf("id must be in uuid format"))
+		return
+	}
+
 	product, err := h.ProductService.Product(productId)
 	if err != nil {
 		log.Print(err)
-		jsonFailResponse(w, http.StatusNotFound, fmt.Errorf("not found"))
+
+		if h.ProductService.IsNotFoundError(err) {
+			jsonFailResponse(w, http.StatusNotFound, supermarket.ErrNotFound)
+			return
+		}
+
+		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
 		return
 	}
 
@@ -85,7 +97,7 @@ func (h *Handler) ProductCreate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("cannot create product"))
+		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
 		return
 	}
 
@@ -119,12 +131,12 @@ func (h *Handler) ProductDelete(w http.ResponseWriter, r *http.Request) {
 	deleted, err := h.ProductService.DeleteProduct(product.Id)
 	if err != nil {
 		log.Print(err)
-		jsonFailResponse(w, http.StatusInternalServerError, fmt.Errorf("cannot delete product"))
+		jsonFailResponse(w, http.StatusInternalServerError, supermarket.ErrInternalServerError)
 		return
 	}
 	if !deleted {
 		log.Print(err)
-		jsonFailResponse(w, http.StatusNotFound, fmt.Errorf("there is no product with that id"))
+		jsonFailResponse(w, http.StatusNotFound, supermarket.ErrNotFound)
 		return
 	}
 

@@ -32,6 +32,7 @@ type ProductService interface {
 	CreateProduct(p *Product) error
 	DeleteProduct(id string) (bool, error)
 	IsDuplicateError(err error) bool
+	IsNotFoundError(err error) bool
 }
 
 type Order struct {
