@@ -15,6 +15,7 @@ type Handler struct {
 	PasswordService supermarket.PasswordService
 	RandomService   supermarket.RandomService
 	DbErrorService  supermarket.DbErrorService
+	TimeService     supermarket.TimeService
 }
 
 // middlewareFunc gets http writer and http request for inspecting

@@ -1,6 +1,9 @@
 package supermarket
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type Product struct {
 	Id    string  `json:"id,omitempty"`
@@ -114,4 +117,8 @@ type RandomService interface {
 type DbErrorService interface {
 	IsDuplicateError(err error) bool
 	IsNotFoundError(err error) bool
+}
+
+type TimeService interface {
+	Now() time.Time
 }

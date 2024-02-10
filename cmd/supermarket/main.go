@@ -13,6 +13,7 @@ import (
 	"github.com/e2dk4r/supermarket/crypto"
 	myHttp "github.com/e2dk4r/supermarket/http"
 	myJwt "github.com/e2dk4r/supermarket/jwt"
+	myTime "github.com/e2dk4r/supermarket/time"
 
 	"github.com/jackc/pgx/v4"
 )
@@ -61,10 +62,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	timeService := &myTime.TimeService{}
+
 	authService := &myJwt.AuthService{
 		UserService:        userService,
 		PasswordService:    passwordService,
 		RandomService:      randomService,
+		TimeService:        timeService,
 		TokenValidDuration: 30 * time.Second,
 
 		Signer:   jwtSigner,
@@ -82,6 +86,7 @@ func main() {
 		PasswordService: passwordService,
 		RandomService:   randomService,
 		DbErrorService:  dbErrorService,
+		TimeService:     timeService,
 	}
 
 	err = http.ListenAndServe(":8080", &handler)

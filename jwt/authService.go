@@ -11,6 +11,7 @@ type AuthService struct {
 	UserService     supermarket.UserService
 	PasswordService supermarket.PasswordService
 	RandomService   supermarket.RandomService
+	TimeService     supermarket.TimeService
 
 	Signer             jwt.Signer
 	Verifier           jwt.Verifier
@@ -43,7 +44,7 @@ func (as *AuthService) CreateToken(u *supermarket.User) (string, error) {
 
 	token, err := builder.Build(&jwt.RegisteredClaims{
 		ID:       id,
-		IssuedAt: jwt.NewNumericDate(time.Now()),
+		IssuedAt: jwt.NewNumericDate(as.TimeService.Now()),
 		Subject:  user.Id,
 	})
 
@@ -62,7 +63,7 @@ func (as *AuthService) CreateAnonToken() (string, error) {
 
 	token, err := jwt.NewBuilder(as.Signer).Build(&jwt.RegisteredClaims{
 		ID:       id,
-		IssuedAt: jwt.NewNumericDate(time.Now()),
+		IssuedAt: jwt.NewNumericDate(as.TimeService.Now()),
 	})
 
 	if err != nil {
@@ -96,7 +97,7 @@ func (as *AuthService) verifyToken(key string, anon bool) error {
 	if claims.IssuedAt == nil {
 		return supermarket.ErrTokenIatClaim
 	}
-	if claims.IssuedAt.Add(as.TokenValidDuration).Before(time.Now()) {
+	if claims.IssuedAt.Add(as.TokenValidDuration).Before(as.TimeService.Now()) {
 		return supermarket.ErrTokenExpired
 	}
 	if !anon && claims.Subject == "" {
